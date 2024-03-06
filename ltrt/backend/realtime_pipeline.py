@@ -40,11 +40,12 @@ def realtime_pipeline(camera_buffers: list[CameraFrameBuffer], trackers: dict[st
             tracker_data = []
             for buffer in camera_buffers:
                 trackers[buffer.cam_id].process_image(frame_buffers[buffer.cam_id][0])
-                output_array = trackers[buffer.cam_id].recorder.process_tracked_objects()
+                output_array =trackers[buffer.cam_id].recorder.process_without_recording(trackers[buffer.cam_id].tracked_objects)
                 tracker_data.append(output_array)
+                print(output_array)
 
             combined_array = np.stack(tracker_data)
-            print(combined_array.shape) # (1, 0, 17, 3) -> which seems a little weird
+            print(combined_array.shape)
 
         # TODO: pass combined array into anipose and spit out 3D data!
 
