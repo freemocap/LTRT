@@ -1,4 +1,6 @@
 from multiprocessing.synchronize import Event as MultiprocessingEvent
+from multiprocessing import Queue
+from typing import Optional
 import numpy as np
 from skellytracker.trackers.base_tracker.base_tracker import BaseTracker
 from queue import Empty
@@ -11,9 +13,10 @@ def realtime_pipeline(
     camera_buffers: list[CameraFrameBuffer],
     trackers: dict[str, BaseTracker],
     camera_group: CameraGroup,
+    output_queue: Queue,
     stop_event: MultiprocessingEvent,
 ):
-    frame_buffers = {buffer.cam_id: None for buffer in camera_buffers}
+    frame_buffers: dict[str, Optional[tuple[np.ndarray, int]]] = {buffer.cam_id: None for buffer in camera_buffers}
     cutoff = int((1 / camera_buffers[0].fps) * 1e9)
 
     for buffer in camera_buffers:
@@ -62,8 +65,11 @@ def realtime_pipeline(
             triangulate_bool = True
 
         if triangulate_bool:
-            triangulated_data = camera_group.triangulate(combined_array) # TODO: try removing numba JIT
-            print(triangulated_data[0, :])
+            triangulated_data = camera_group.triangulate(combined_array) # Turned off Numba JIT
+            try:
+                output_queue.put_nowait(triangulated_data)
+            except Empty:
+                pass
             frame_buffers = {buffer.cam_id: None for buffer in camera_buffers} 
             frame_count += 1
 

@@ -19,6 +19,8 @@ def run_realtime(calibration_toml_path: str | Path, stop_event: MultiprocessingE
     for buffer in cam_buffers:
         buffer.outbound_queue = Queue(maxsize=3)
 
+    output_queue = Queue(maxsize=1)
+
     trackers = {buffer.cam_id: YOLOPoseTracker() for buffer in cam_buffers}
 
     processes = camera_process_handler_sm(
@@ -27,7 +29,7 @@ def run_realtime(calibration_toml_path: str | Path, stop_event: MultiprocessingE
     
     realtime_pipeline_process = Process(
         target=realtime_pipeline,
-        args=(cam_buffers, trackers, camera_group, stop_event)
+        args=(cam_buffers, trackers, camera_group, output_queue, stop_event)
     )
     realtime_pipeline_process.start()
     processes.append(realtime_pipeline_process)
@@ -44,9 +46,14 @@ if __name__ == "__main__":
     import pstats
     stop_event = Event()
     calibration_toml_path = "/Users/philipqueen/freemocap_data/logs_info_and_settings/last_successful_calibration.toml"
-    with cProfile.Profile() as profile:
-        cam_buffers, processes = run_realtime(calibration_toml_path, stop_event)
-        shutdown_realtime(processes=processes, cam_buffers=cam_buffers, stop_event=stop_event)
+
+    cam_buffers, processes = run_realtime(calibration_toml_path, stop_event)
+    shutdown_realtime(processes=processes, cam_buffers=cam_buffers, stop_event=stop_event)
+
+
+    # with cProfile.Profile() as profile:
+    #     cam_buffers, processes = run_realtime(calibration_toml_path, stop_event)
+    #     shutdown_realtime(processes=processes, cam_buffers=cam_buffers, stop_event=stop_event)
 
     # results = pstats.Stats(profile)
     # results.sort_stats(pstats.SortKey.TIME)
