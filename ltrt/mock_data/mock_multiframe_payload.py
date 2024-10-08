@@ -26,7 +26,7 @@ class MockMultiFramePayload:
 
         self.video_dict = self.load_video_dict(synchronized_video_folder_path)
 
-        self.current_payload = MultiFramePayload.create_initial(camera_ids=list(self.video_dict.keys()))
+        self.current_payload = self.create_initial_payload()
         
     def load_video_dict(self, synchronized_video_folder_path: str | Path) -> Dict[int, cv2.VideoCapture]:
         video_paths = get_video_paths(path_to_video_folder=synchronized_video_folder_path)
@@ -42,10 +42,14 @@ class MockMultiFramePayload:
     def create_initial_payload(self):
         initial_payload =  MultiFramePayload.create_initial(camera_ids=list(self.video_dict.keys()))
         for camera_id, video_capture in self.video_dict.items():
-            metadata = create_empty_frame_metadata(camera_id=camera_id, frame_number=0)
             ret, frame = video_capture.read()
             if not ret:
-                raise ValueError(f"Failed to read initial frame for camera {camera_id}")
+                print(f"Failed to read frame {self.current_payload.multi_frame_number} for camera {camera_id}")
+                print("Closing video captures")
+                self.close_video_dict()
+                self.current_payload = None  # this ensures None is stuffed into Queue to signal processing is done, could be a better way to do this
+                return None
+            metadata = create_empty_frame_metadata(camera_id=camera_id, frame_number=0)
             frame = FramePayload.create(image=frame, metadata=metadata)
 
             initial_payload.add_frame(frame)

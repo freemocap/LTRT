@@ -3,12 +3,12 @@ name = "ltrt"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10s"
+requires-python = ">=3.10"
 dependencies = [
     "aniposelib>=0.7.0",
     "skellycam",
     "skellyforge>=2024.8.1008",
-    "skellytracker>=2024.9.1019",
+    "skellytracker",
 ]
 
 [tool.uv]
@@ -18,3 +18,4 @@ dev-dependencies = [
 
 [tool.uv.sources]
 skellycam = { git = "https://github.com/freemocap/skellycam", rev = "jon/react-electron" }
+skellytracker = { git = "https://github.com/freemocap/skellytracker", rev = "philip/process_single_frame_in_recorder" }

@@ -1,4 +1,4 @@
 aniposelib>=0.7.0
 skellycam
 skellyforge>=2024.8.1008
-skellytracker>=2024.9.1019
+skellytracker[yolo]>=2024.9.1019
