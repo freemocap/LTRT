@@ -11,18 +11,18 @@ from skellycam.core.frames.payloads.multi_frame_payload import MultiFramePayload
 
 from skellytracker import YOLOPoseTracker, MediapipeHolisticTracker
 
-# from freemocap.utilities.geometry.rotate_by_90_degrees_around_x_axis import (
-#     rotate_by_90_degrees_around_x_axis,
-# )
-# from freemocap.core_processes.post_process_skeleton_data.post_process_skeleton import (
-#     post_process_data,
-# )
-# from freemocap.data_layer.recording_models.post_processing_parameter_models import (
-#     ProcessingParameterModel,
-# )
-# from freemocap.core_processes.process_motion_capture_videos.processing_pipeline_functions.anatomical_data_pipeline_functions import (
-#     calculate_anatomical_data,
-# )
+from freemocap.utilities.geometry.rotate_by_90_degrees_around_x_axis import (
+    rotate_by_90_degrees_around_x_axis,
+)
+from freemocap.core_processes.post_process_skeleton_data.post_process_skeleton import (
+    post_process_data,
+)
+from freemocap.data_layer.recording_models.post_processing_parameter_models import (
+    ProcessingParameterModel, PostProcessingParametersModel,
+)
+from freemocap.core_processes.process_motion_capture_videos.processing_pipeline_functions.anatomical_data_pipeline_functions import (
+    calculate_anatomical_data,
+)
 
 numba_logger = logging.getLogger("numba")
 numba_logger.setLevel(logging.WARNING)
@@ -81,8 +81,6 @@ def lightweight_realtime_pipeline(
         combined_array = tracker.recorder.process_tracked_objects(image_size=frame_payload.image.shape[:2])[:, :, :2] # incorrectly assumes all images have same shape
         tracker.recorder.clear_recorded_objects()
 
-        print(f"combined array shape: {combined_array.shape}")
-
         end_track = perf_counter_ns()
         print(f"tracking took {(end_track - start_track) / 1e6} ms")
 
@@ -117,7 +115,9 @@ def heavyweight_realtime_pipeline(
     # initialize tracker
     tracker = MediapipeHolisticTracker(model_complexity=2, static_image_mode=True)
 
-    # recording_parameter_model = ProcessingParameterModel()
+    recording_parameter_model = ProcessingParameterModel(
+        post_processing_parameters_model=PostProcessingParametersModel(run_butterworth_filter=False),
+    )
     start = perf_counter_ns()
 
     while not stop_event.is_set():
@@ -155,8 +155,6 @@ def heavyweight_realtime_pipeline(
         combined_array = tracker.recorder.process_tracked_objects(image_size=frame_payload.image.shape[:2])[:, :, :2] # TODO: this doesn't account for images with different sizes
         tracker.recorder.clear_recorded_objects()
 
-        print(f"combined array shape: {combined_array.shape}")
-
         end_track = perf_counter_ns()
         print(f"tracking took {(end_track - start_track) / 1e6} ms")
 
@@ -169,25 +167,30 @@ def heavyweight_realtime_pipeline(
         # push 3d data to output queue
         # output_queue.put(triangulated_data)
 
-        # Can't import freemocap as a library because of circular dependencies
-        # start_postprocessing = perf_counter_ns()
-        # rotated_data = rotate_by_90_degrees_around_x_axis(triangulated_data)
-        # post_processed_data = post_process_data(
-        #     recording_processing_parameter_model=recording_parameter_model,
-        #     raw_skel3d_frame_marker_xyz=rotated_data,
-        #     queue=None,
-        # )
-        # anatomical_data_dict = calculate_anatomical_data(
-        #     processing_parameters=recording_parameter_model,
-        #     skel3d_frame_marker_xyz=post_processed_data,
-        #     queue=None,
-        # )
+        # add single frame index to triangulated data
+        triangulated_data = np.expand_dims(triangulated_data, axis=0)
 
-        # # skipping data saving for now
-        # end_postprocessing = perf_counter_ns()
-        # print(
-        #     f"postprocessing took {(end_postprocessing - start_postprocessing) / 1e6} ms"
-        # )
+        # Need to disable logging setup in freemocap __init__ to be able to import as a library
+        start_postprocessing = perf_counter_ns()
+        print(f"triangulated_data_shape: {triangulated_data.shape}")
+        rotated_data = rotate_by_90_degrees_around_x_axis(triangulated_data)
+        # postprocessing data fails on butterworth filter, which requires at least 15 frames
+        post_processed_data = post_process_data( 
+            recording_processing_parameter_model=recording_parameter_model,
+            raw_skel3d_frame_marker_xyz=rotated_data,
+            queue=None,
+        )
+        anatomical_data_dict = calculate_anatomical_data(
+            processing_parameters=recording_parameter_model,
+            skel3d_frame_marker_xyz=post_processed_data,
+            queue=None,
+        )
+
+        # skipping data saving for now
+        end_postprocessing = perf_counter_ns()
+        print(
+            f"postprocessing took {(end_postprocessing - start_postprocessing) / 1e6} ms"
+        )
 
         end = perf_counter_ns()
         print(
