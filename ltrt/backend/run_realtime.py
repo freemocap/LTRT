@@ -5,7 +5,7 @@ import time
 from aniposelib.cameras import CameraGroup
 
 from ltrt.mock_data.mock_multiframe_payload import mock_camera_input
-from ltrt.backend.realtime_pipeline import lightweight_realtime_pipeline
+from ltrt.backend.realtime_pipeline import heavyweight_realtime_pipeline, lightweight_realtime_pipeline
 
 def run_realtime(calibration_toml_path: str | Path, stop_event) -> list[Process]:
     camera_group = CameraGroup.load(str(calibration_toml_path))
@@ -28,6 +28,11 @@ def run_realtime(calibration_toml_path: str | Path, stop_event) -> list[Process]
         target=lightweight_realtime_pipeline,
         args=[camera_group, frame_payload_queue, output_data_queue, stop_event]
     )
+    # print("starting heavyweight realtime pipeline process")
+    # realtime_pipeline_process = Process(
+    #     target=heavyweight_realtime_pipeline,
+    #     args=[camera_group, frame_payload_queue, output_data_queue, stop_event]
+    # )
     print("starting processes")
     mock_camera_process.start()
     realtime_pipeline_process.start()
