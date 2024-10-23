@@ -60,7 +60,7 @@ class MockMultiFramePayload:
 
         for camera_id, video_capture in self.video_dict.items():
             ret, frame = video_capture.read()
-            if not ret:
+            if not ret or self.current_payload.multi_frame_number > 25: # temporary limit for testing
                 print(f"Failed to read frame {self.current_payload.multi_frame_number} for camera {camera_id}")
                 print("Closing video captures")
                 self.close_video_dict()
