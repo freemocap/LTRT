@@ -119,16 +119,19 @@ def lightweight_realtime_pipeline(
     print("Queue pull:")
     print(f"\tAverage time: {np.mean(queue_pull_times[1:])} ms")  # throw out warmup frame
     print(f"\tMedian time: {np.median(queue_pull_times)} ms")
+    print(f"\tPercent of median time: {np.median(queue_pull_times)/np.median(multiframe_payload_times) * 100}")
     print(f"\tFastest {num_samples} times: {np.sort(queue_pull_times)[:num_samples].tolist()} ms")
     print(f"\tSlowest {num_samples} times: {np.sort(queue_pull_times)[-num_samples:].tolist()} ms")
     print("Tracking:")
     print(f"\tAverage time: {np.mean(tracking_times[1:])} ms")  # throw out warmup frame
     print(f"\tMedian time: {np.median(tracking_times)} ms")
+    print(f"\tPercent of median time: {np.median(tracking_times)/np.median(multiframe_payload_times) * 100}")
     print(f"\tFastest {num_samples} times: {np.sort(tracking_times)[:num_samples].tolist()} ms")
     print(f"\tSlowest {num_samples} times: {np.sort(tracking_times)[-num_samples:].tolist()} ms")
     print("Triangulation:")
     print(f"\tAverage time: {np.mean(triangulation_times[1:])} ms")  # throw out warmup frame
     print(f"\tMedian time: {np.median(triangulation_times)} ms")
+    print(f"\tPercent of median time: {np.median(triangulation_times)/np.median(multiframe_payload_times) * 100}")
     print(f"\tFastest {num_samples} times: {np.sort(triangulation_times)[:num_samples].tolist()} ms")
     print(f"\tSlowest {num_samples} times: {np.sort(triangulation_times)[-num_samples:].tolist()} ms")
 
