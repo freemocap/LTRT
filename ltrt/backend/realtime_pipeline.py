@@ -45,6 +45,10 @@ def lightweight_realtime_pipeline(
     output_queue: Queue,
     stop_event,
 ):
+    multiframe_payload_times = []
+    queue_pull_times = []
+    tracking_times = []
+    triangulation_times = []
     start = perf_counter_ns()
     while not stop_event.is_set():
         # pull multiframe payload from queue
@@ -93,12 +97,40 @@ def lightweight_realtime_pipeline(
         print(
             f"Total time to process frame payload {multiframe_payload.multi_frame_number}: {(end - start) / 1e6} ms"
         )
+        multiframe_payload_times.append((end - start) / 1e6)
+        queue_pull_times.append((end_queue - start_queue) / 1e6)
+        tracking_times.append((end_track - start_track) / 1e6)
+        triangulation_times.append((end_triangulate - start_triangulate) / 1e6)
+
         start = perf_counter_ns()
 
     # should we flush the queue here?
     # i.e. if stop event is called but frames are still in the queue, should we cycle through until queue is empty?
 
     print("finished receiving multiframe payloads")
+
+    # Timestamp statistics
+    num_samples = 5
+    print(f"Total multiframe payload:")
+    print(f"\tAverage time: {np.mean(multiframe_payload_times[1:])} ms")  # throw out warmup frame
+    print(f"\tMedian time: {np.median(multiframe_payload_times)} ms")
+    print(f"\tFastest {num_samples} times: {np.sort(multiframe_payload_times)[:num_samples].tolist()} ms")
+    print(f"\tSlowest {num_samples} times: {np.sort(multiframe_payload_times)[-num_samples:].tolist()} ms")
+    print("Queue pull:")
+    print(f"\tAverage time: {np.mean(queue_pull_times[1:])} ms")  # throw out warmup frame
+    print(f"\tMedian time: {np.median(queue_pull_times)} ms")
+    print(f"\tFastest {num_samples} times: {np.sort(queue_pull_times)[:num_samples].tolist()} ms")
+    print(f"\tSlowest {num_samples} times: {np.sort(queue_pull_times)[-num_samples:].tolist()} ms")
+    print("Tracking:")
+    print(f"\tAverage time: {np.mean(tracking_times[1:])} ms")  # throw out warmup frame
+    print(f"\tMedian time: {np.median(tracking_times)} ms")
+    print(f"\tFastest {num_samples} times: {np.sort(tracking_times)[:num_samples].tolist()} ms")
+    print(f"\tSlowest {num_samples} times: {np.sort(tracking_times)[-num_samples:].tolist()} ms")
+    print("Triangulation:")
+    print(f"\tAverage time: {np.mean(triangulation_times[1:])} ms")  # throw out warmup frame
+    print(f"\tMedian time: {np.median(triangulation_times)} ms")
+    print(f"\tFastest {num_samples} times: {np.sort(triangulation_times)[:num_samples].tolist()} ms")
+    print(f"\tSlowest {num_samples} times: {np.sort(triangulation_times)[-num_samples:].tolist()} ms")
 
 
 # Takes about 300 ms per frame group with mediapipe model_complexity=2
