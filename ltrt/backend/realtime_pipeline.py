@@ -3,13 +3,13 @@ from typing import Dict, Optional
 import numpy as np
 from queue import Empty
 from aniposelib.cameras import CameraGroup
-from time import perf_counter_ns, sleep
+from time import perf_counter_ns
 import logging
 
 
 from skellycam.core.frames.payloads.multi_frame_payload import MultiFramePayload
 
-from skellytracker import YOLOPoseTracker, MediapipeHolisticTracker
+from skellytracker import MediapipeHolisticTracker
 
 from freemocap.utilities.geometry.rotate_by_90_degrees_around_x_axis import (
     rotate_by_90_degrees_around_x_axis,
@@ -111,7 +111,7 @@ def lightweight_realtime_pipeline(
 
     # Timestamp statistics
     num_samples = 5
-    print(f"Total multiframe payload:")
+    print("Total multiframe payload:")
     print(f"\tAverage time: {np.mean(multiframe_payload_times[1:])} ms")  # throw out warmup frame
     print(f"\tMedian time: {np.median(multiframe_payload_times)} ms")
     print(f"\tFastest {num_samples} times: {np.sort(multiframe_payload_times)[:num_samples].tolist()} ms")

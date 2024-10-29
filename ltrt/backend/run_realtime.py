@@ -6,7 +6,7 @@ from aniposelib.cameras import CameraGroup
 
 from ltrt.backend.tracking_process import run_tracker
 from ltrt.mock_data.mock_multiframe_payload import mock_camera_input
-from ltrt.backend.realtime_pipeline import heavyweight_realtime_pipeline, lightweight_realtime_pipeline
+from ltrt.backend.realtime_pipeline import lightweight_realtime_pipeline
 
 def run_realtime(calibration_toml_path: str | Path, stop_event) -> list[Process]:
     camera_group = CameraGroup.load(str(calibration_toml_path))

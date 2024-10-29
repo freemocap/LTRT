@@ -5,7 +5,7 @@ from typing import Dict
 from time import perf_counter_ns
 
 from skellycam.core.frames.payloads.multi_frame_payload import MultiFramePayload
-from skellytracker import YOLOPoseTracker, MediapipeHolisticTracker
+from skellytracker import MediapipeHolisticTracker
 
 
 def run_tracker(

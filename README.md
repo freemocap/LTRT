@@ -1,15 +1,17 @@
-# TODO:
-Make a staged pipeline:
-Try this again in a process that has an input queue.
+# Let's Try Real Time
 
-Queue outputs packets that have a dict (~~MultiFrame.todict()), with multiframe, metadata...
-key is cameraID, value is image. All images are synchronized coming in.
+An isolated proof of concept for getting the FreeMoCap backend running in realtime. 
 
-- spoof this by reading from videos
+## Approach
 
-V1: At maximum quality, will it work and how long does it take?
-    - max model quality, YOLO crop, postprocessing, etc.
-V2: Sacrificing quality, can we beat 33ms?
-    - can skip postprocessing
+Currently, it mocks realtime video capture by sending `MultiFramePayload` objects through a queue to the realtime process (happens in `mock_multiframe_payload.py`). The realtime pipeline pulls the payloads out of the queue, and sends each frame to a separate tracking process in separate `payload` queues, which then sends the resulting array back to the realtime pipeline in `output` queues. The arrays are then combined and triangulated, giving 3d data.
 
-save data (just as basic numpy array), output some visualization
+## Results
+
+So far, this has been optimized from ~144 ms per frame for a naive version to ~70 ms per frame.
+
+## Getting Started
+
+Install with `pip install -e .` (or `uv pip install -e .`).
+
+To run, run `__main__.py`.
