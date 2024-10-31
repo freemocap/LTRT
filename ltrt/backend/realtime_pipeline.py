@@ -49,6 +49,7 @@ def lightweight_realtime_pipeline(
     queue_pull_times = []
     tracking_times = []
     triangulation_times = []
+    triangulated_data_store = []
     start = perf_counter_ns()
     while not stop_event.is_set():
         # pull multiframe payload from queue
@@ -87,7 +88,8 @@ def lightweight_realtime_pipeline(
         # triangulate frame data with anipose
         start_triangulate = perf_counter_ns()
         triangulated_data = camera_group.triangulate(combined_array)
-        # print(f"triangulated data shape: {triangulated_data.shape}")
+        triangulated_data_store.append(triangulated_data)
+        print(f"triangulated data shape: {triangulated_data.shape}")
         end_triangulate = perf_counter_ns()
         print(f"Triangulation took {(end_triangulate - start_triangulate) / 1e6} ms")
         # push 3d data to output queue
@@ -107,7 +109,7 @@ def lightweight_realtime_pipeline(
     # should we flush the queue here?
     # i.e. if stop event is called but frames are still in the queue, should we cycle through until queue is empty?
 
-    print("finished receiving multiframe payloads")
+    print("Finished receiving multiframe payloads")
 
     # Timestamp statistics
     num_samples = 5
@@ -134,6 +136,10 @@ def lightweight_realtime_pipeline(
     print(f"\tPercent of median time: {np.median(triangulation_times)/np.median(multiframe_payload_times) * 100}")
     print(f"\tFastest {num_samples} times: {np.sort(triangulation_times)[:num_samples].tolist()} ms")
     print(f"\tSlowest {num_samples} times: {np.sort(triangulation_times)[-num_samples:].tolist()} ms")
+
+    final_triangulated_data = np.stack(triangulated_data_store, axis=0)
+    print(f"Saving triangulated data with shape {final_triangulated_data.shape} to file")
+    np.save("3d_data_frames_markers_xyz.npy", final_triangulated_data)
 
 
 # Takes about 300 ms per frame group with mediapipe model_complexity=2
