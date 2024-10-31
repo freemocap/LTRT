@@ -1,4 +1,11 @@
-from ltrt.gui.main_window import main
+from multiprocessing import Event
+import time
+from ltrt.backend.run_realtime import run_realtime, shutdown_realtime
 
 if __name__ == "__main__":
-    main()
+    stop_event = Event()
+    calibration_toml_path = ".assets/freemocap_sample_data/freemocap_sample_data_camera_calibration.toml"
+    processes = run_realtime(calibration_toml_path, stop_event)
+    while not stop_event.is_set():
+        time.sleep(0.1)
+    shutdown_realtime(processes=processes)
