@@ -22,7 +22,7 @@ class MockMultiFramePayload:
     """
     def __init__(self, synchronized_video_folder_path: str | Path | None = None):
         if synchronized_video_folder_path is None:
-            synchronized_video_folder_path = Path(".assets/freemocap_sample_data/synchronized_videos")
+            synchronized_video_folder_path = Path.home() / "freemocap_data/recording_sessions/freemocap_sample_data/synchronized_videos"
 
         self.video_dict = self.load_video_dict(synchronized_video_folder_path)
 

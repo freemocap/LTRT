@@ -6,9 +6,10 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "aniposelib>=0.7.0",
+    "freemocap==1.4.*",
     "skellycam",
-    "skellyforge>=2024.8.1008",
-    "skellytracker",
+    "skellyforge",
+    "skellytracker[all]",
 ]
 
 [tool.uv]
@@ -17,5 +18,6 @@ dev-dependencies = [
 ]
 
 [tool.uv.sources]
-skellycam = { git = "https://github.com/freemocap/skellycam", rev = "jon/react-electron" }
+skellycam = { git = "https://github.com/freemocap/skellycam", rev = "jon/development" }
 skellytracker = { git = "https://github.com/freemocap/skellytracker", rev = "philip/process_single_frame_in_recorder" }
+skellyforge = { git = "https://github.com/freemocap/skellyforge" }
