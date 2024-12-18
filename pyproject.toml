@@ -19,5 +19,5 @@ dev-dependencies = [
 
 [tool.uv.sources]
 skellycam = { git = "https://github.com/freemocap/skellycam", rev = "jon/development" }
-skellytracker = { git = "https://github.com/freemocap/skellytracker", rev = "philip/process_single_frame_in_recorder" }
+skellytracker = { git = "https://github.com/freemocap/skellytracker", rev =  "jon/development" }#rev = "philip/process_single_frame_in_recorder" }
 skellyforge = { git = "https://github.com/freemocap/skellyforge" }
