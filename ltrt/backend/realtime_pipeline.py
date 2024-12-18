@@ -73,6 +73,8 @@ def lightweight_realtime_pipeline(
             )
         # TODO: Frame payloads come in an arbitrary order - should we sort by Camera ID?
         # or, just access by order of camID (are we guaranteed to have 0-N? or can there be missing values?)
+        #JSM 1 - Always access by-camera data using the camera_id as the key to the dict. Avoid logic that assumes a specific order, so sorting is unnecessary.
+        #JSM 2 - There cannot be missing values, all cameras within a camera_group are guaranteed to provide data on every frame - each sub-frame has the same value in their `frame_number property`
 
         print("-----------Processing multiframe payload-----------")
         start_track = perf_counter_ns()
