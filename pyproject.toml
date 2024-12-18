@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "aniposelib>=0.7.0",
-    "freemocap==1.4.*",
     "skellycam",
     "skellyforge",
     "skellytracker[all]",
